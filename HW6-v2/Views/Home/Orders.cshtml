@@ -1,0 +1,61 @@
+﻿@model List<HW6_v2.Models.OrdersViewModel>
+@{
+    ViewBag.Title = "orders";
+}
+
+<h2>Orders</h2>
+@using (Html.BeginForm("Search", "Home", FormMethod.Post))
+{
+    <form>
+        <div class="row">
+            <div class="col-lg-3">
+                <input type="date" name="date" class="form-control" />
+            </div>
+            <div class="col-1">
+                <input type="submit" value="Search" class="form-control btn btn-info" />
+            </div>
+        </div>
+    </form>
+}
+
+@for (int i = 0; i < Model.Count(); i++)
+{
+    if (Model.Where(p => p.OrderID == i).Count() > 0)
+    {
+        <h1>Order @Model.Where(p => p.OrderID == i).FirstOrDefault().OrderID -@Model.Where(p => p.OrderID == i).FirstOrDefault().Date.Date.ToShortDateString() </h1>
+        <table class="table table-striped ">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>List Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model.Where(p => p.OrderID == i).ToList())
+                {
+                    <tr>
+                        <td>@order.OrderID@order.ProdName.product_name</td>
+                        <td>@order.Price</td>
+                        <td>@order.Quantity</td>
+                        <td>@order.Total</td>
+                    </tr>
+                }
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td>Grand Total</td>
+                    <td>@Model.Where(p => p.OrderID == i).Sum(p => p.Total)</td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+}
+@*div></div>
+    Page @(Model.PageCount<Model.PageNumber ?0: Model.PageNumber)/@Model.PageCount)
+    <div>
+        @Html.PagedListPager(Model, page => Url.Action("Orders", "Orders", new { page }))
+
+    </div>*@

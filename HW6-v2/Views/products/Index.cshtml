@@ -1,0 +1,189 @@
+﻿@model IPagedList<HW6_v2.Models.product>
+@using PagedList;
+@using PagedList.Mvc;
+
+
+@{
+    ViewBag.Title = "Products";
+}
+
+<h2>Products</h2>
+
+<div class=" container">
+    <div class="row-no-gutters">
+        @using (Html.BeginForm("Search", "products", FormMethod.Post))
+        {
+            <input type="text" name="search" placeholder="Enter Product Name" />
+            <input type="submit" name="submit " value="Search" class=" btn btn-info" />
+        }
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="clearTextBox();">Create New</button><br /><br />
+      
+    </div>
+
+    <table class="table">
+        <tr>
+            <th>Product</th>
+            <th>Year</th>
+            <th>Price</th>
+            <th>Brand</th>
+            <th>Category</th>
+            <th></th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.product_name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.model_year)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.list_price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.brand.brand_name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.category.category_name)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = item.product_id }, new { @class = "btn btn-info" })  |
+                    @Html.ActionLink("Details", "Details", new { id = item.product_id }, new { @class = "btn btn-primary" }) ) |
+                    @Html.ActionLink("Delete", "Delete", new { id = item.product_id }, new { @class = "btn btn-danger" }) )
+                </td>
+            </tr>
+        }
+
+    </table>
+</div>
+<div></div>
+    Page @(Model.PageCount<Model.PageNumber ?0: Model.PageNumber)/@Model.PageCount)
+    <div>
+        @Html.PagedListPager(Model, page => Url.Action("Index", new { page = page }))
+
+    </div>
+
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">×</button>
+                    <h4 class="modal-title" id="myModalLabel">Add Products</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="FormData" method="POST">
+
+                        <div class="form-group">
+                            <label for="ID">ID</label>
+                            <input type="text" class="form-control" id="prodID" placeholder="ID" disabled="disabled" />
+                        </div>
+                        <div class="form-group">
+                            <label for="product">Product</label>
+                            <input type="text" class="form-control" id="Product" placeholder="Product" />
+                        </div>
+                        <div class="form-group">
+                            <label for="Year">Year</label>
+                            <input type="text" class="form-control" id="Year" placeholder="Year" />
+                        </div>
+                        <div class="form-group">
+                            <label for="Price">Price</label>
+                            <input type="text" class="form-control" id="Price" placeholder="Price" />
+                        </div>
+                        <div class="form-group">
+                            <label for="Brand">Brand</label>
+                            <input type="text" class="form-control" id="Brand" placeholder="Brand" />
+                        </div>
+                        <div class="form-group">
+                            <label for="Category">Category</label>
+                            <input type="text" class="form-control" id="Category" placeholder="Category" />
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+
+                    <a href="#" class="btn btn-primary" id="btnAdd">Add</a>
+                    <a href="#" class="btn btn-primary" id="btnUpdate" style="display:none;" onclick="Update";">Add</a>
+                    <a href="button" class="btn btn-default" data-dismiss="modal">Close</a>
+                </div>
+            </div>
+        </div>
+    </div>
+@section scripts{
+    <script>
+     
+        $(document).ready(function () {
+            $("#btnAdd").click(function () {
+                var Dataform = $("#FormData").serialize();
+
+                $.ajax({
+                    type: "POST",
+                    url: "/products/Create",
+                    data: Dataform,
+
+                    success: function () {
+                        window.location.href = '/products/Index';
+                    }
+                })
+            })
+
+            function GetById(ID) {
+                var url = products / GetById ? id + ID :
+                    $('#myModal').modal('show');
+
+                $.ajax({
+                    type: "GET",
+                    url: url,
+
+                    success: function (response) {
+                        var update = JSON.parse(response);
+
+                        $('#ProdID').val(update.ID);
+                        $('#Product').val(update.products);
+                        $('#Year').val(update.Year);
+                        $('#Price').val(update.Price);
+                        $('#Brand').val(update.Brand);
+                        $('#Category').val(update.category);
+                        $('#myModal').modal('show');
+                        $('#btnUpdate').show;
+                        $('#btnAdd').Hide;
+
+                    }
+                })
+                function Update() {
+                    var res = validate();
+                    if (res == false) {
+                        return false;
+                    }
+                    var UPD = {
+                        ProdID: $('#ProdID').val(),
+                        Product: $('#Product').val(),
+                        Year: $('#Year').val(),
+                        Price: $('#Price').val(),
+                        Brand: $('#Brand').val(),
+                        Category: $('#Category').val(),
+                    };
+                    $.ajax({
+                        url: "/products/Edit",
+                        data: JSON.stringify(UPD),
+                        type: "POST",
+                        contentType: "application/json;charset=utf-8",
+                        dataType: "json",
+                        success: function (result) {
+                            loadData();
+                            $('#myModal').modal('hide');
+                            $('#ProdID').val("");
+                            $('#Product').val("");
+                            $('#Year').val("");
+                            $('#Price').val("");
+                            $('#Brand').val("");
+                            $('#Category').val("");
+                        },
+                        error: function (errormessage) {
+                            alert(errormessage.responseText);
+                        }
+                    });
+                }
+    </script>
+    }
